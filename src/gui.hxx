@@ -32,6 +32,7 @@
 #include "gunittrack.hxx"
 #include "gmastertrack.hxx"
 #include "gaudioeditor.hxx"
+#include "gwaveform.hxx"
 
 #include "diskwriter.hxx"
 #include "diskreader.hxx"
@@ -39,10 +40,14 @@
 // non-session-manager integration
 #include "nsm.h"
 
+#include <stdio.h>
+
+
 
 using namespace std;
 
 class AudioBuffer;
+class GWaveForm;
 
 class Gui
 {
@@ -77,16 +82,26 @@ class Gui
     /// used to load samples into the grid
     void selectLoadSample( int track, int clip );
     
+#if 0
     /// allows the user to select a Controller definition
     static void selectLoadController(Fl_Widget* w, void*);
+#endif
     
+    /* void setMidiControllerLayoutValues(Controller *c); */
     
     int samplerate;
     
     int getWindowWidth(){return window.w();}
     
+    bool moveGridFrame(int xOffset, int yOffset);
+    void setCtrlFrameSize();
+    void setGridFrameWidth(int w) { gridFrameWidth = w; }
+    void setGridFrameHeight(int h) { gridFrameHeight = h; }
+
     nsm_client_t* getNsm(){return nsm;}
   
+    Fl_Box* ctrlClipFrame;
+
   private:
     vector<std::string> controllerVector;
     
@@ -104,11 +119,17 @@ class Gui
     GMasterTrack*       master;
     
     vector<GTrack*>     tracks;
+    GWaveForm*			waveForm;
     
     // FIXME: refactor tooltip code out..?
     std::string         tooltip;
     Fl_Box*             tooltipLabel;
     
+    int gridFrameWidth;
+    int gridFrameHeight;
+    int gridFrameClipOffset;
+    int gridFrameTrackOffset;
+
     // non-session-manager
     nsm_client_t* nsm;
 };

@@ -59,6 +59,7 @@ class Logic
     
     void looperUseAsTempo(int track, int scene);
     void looperClipLenght(int track, int scene, int lenght);
+
 };
 
 #endif // LUPPP_LOGIC_H

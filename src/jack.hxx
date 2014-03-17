@@ -106,7 +106,11 @@ class Jack
     int bindingScene;
     int bindingSend;
     int bindingActive;
-  
+
+    void moveGridFrameUp();
+    void moveGridFrameDown();
+
+
   private:
     jack_client_t* client;
     

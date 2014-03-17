@@ -89,6 +89,12 @@ namespace Event
     TRACK_VOLUME,
     TRACK_RECORD_ARM,
     
+    // Move Grid Frame
+    MOVE_GRID_FRAME_UP,
+    MOVE_GRID_FRAME_DOWN,
+    MOVE_GRID_FRAME_LEFT,
+    MOVE_GRID_FRAME_RIGHT,
+
     FX_REVERB,
     
     LOOPER_LOAD,
@@ -114,6 +120,7 @@ namespace Event
     CONTROLLER_INSTANCE,
     CONTROLLER_INSTANCE_REMOVE,
     CONTROLLER_INSTANCE_GET_TO_WRITE,
+    CONTROLLER_CONNECTED,
     CONTROLLER_BINDING_ENABLE,
     CONTROLLER_BINDING_TARGET,
     CONTROLLER_BINDING_MADE,
@@ -232,6 +239,15 @@ class EventControllerInstance : public EventBase
     uint32_t size() { return sizeof(EventControllerInstance); }
     void* controller;
     EventControllerInstance(void* c = 0) : controller(c) {}
+};
+
+class EventControllerConnected : public EventBase
+{
+  public:
+    int type() { return int(CONTROLLER_CONNECTED); }
+    uint32_t size() { return sizeof(EventControllerConnected); }
+    void* controller;
+    EventControllerConnected(void* c = 0) : controller(c) {}
 };
 
 class EventControllerInstanceRemove : public EventBase
@@ -423,6 +439,40 @@ class EventGridLaunchScene : public EventBase
     
     EventGridLaunchScene(){};
     EventGridLaunchScene(int s): scene(s){}
+};
+
+class EventMoveGridFrameUp : public EventBase
+{
+  public:
+    int type() { return int(MOVE_GRID_FRAME_UP); }
+    uint32_t size() { return sizeof(EventMoveGridFrameUp); }
+
+    int track;
+    int scene;
+    GridLogic::State state;
+
+    static const char* prettyName;
+    const char* name(){ return prettyName; }
+
+    EventMoveGridFrameUp(){};
+    EventMoveGridFrameUp(int x, int y){};
+};
+
+class EventMoveGridFrameDown : public EventBase
+{
+  public:
+    int type() { return int(MOVE_GRID_FRAME_DOWN); }
+    uint32_t size() { return sizeof(EventMoveGridFrameDown); }
+
+    int track;
+    int scene;
+    GridLogic::State state;
+
+    static const char* prettyName;
+    const char* name(){ return prettyName; }
+
+    EventMoveGridFrameDown(){};
+    EventMoveGridFrameDown(int x, int y) {};
 };
 
 class EventFxReverb : public EventBase

@@ -84,7 +84,11 @@ class Controller
     
     /// reset controller
     virtual void reset();
-  
+
+    // Controller-specific layout values
+    int gridWidth;
+    int gridHeight;
+
   private:
     static int privateID;
     int ID;

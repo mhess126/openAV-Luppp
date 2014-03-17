@@ -53,6 +53,14 @@ static void addControllerUiDsp(OptionsWindow* self, GenericMIDI* c)
   
   self->tabs->redraw();
   
+   LUPPP_NOTE("Controller Loaded: GridWidth: %i, GridHeight: %i", c->gridWidth, c->gridHeight);
+	if (c->gridWidth > 0 && c->gridHeight > 0) {
+	LUPPP_NOTE("Controller has Grid, Show Frame");
+	LUPPP_NOTE("Pushing Controller Instance to GUI RB");
+	EventControllerConnected tmp(c);
+	writeToGuiRingbuffer( &tmp );
+  }
+
   // send to DSP side
   EventControllerInstance e(c);
   writeToDspRingbuffer( &e );

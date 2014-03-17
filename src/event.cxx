@@ -37,6 +37,13 @@ const char* EventMetronomeActive::prettyName = "metronome:active";
 const char* EventGridEvent::prettyName = "grid:event";
 const char* EventGridLaunchScene::prettyName = "grid:launch_scene";
 
+const char* EventMoveGridFrameUp::prettyName = "move_grid_frame:up";
+const char* EventMoveGridFrameDown::prettyName = "move_grid_frame:down";
+/*
+const char* EventMoveGridFrameLeft::prettyName = "move_grid_frame:left";
+const char* EventMoveGridFrameRight::prettyName = "move_grid_frame:right";
+*/
+
 EVENT_TYPE Event::getTypeFromName(const char* name)
 {
   for(int i = 0; i < EVENT_TYPE_FINAL; i++)
@@ -75,7 +82,13 @@ const char* Event::getPrettyName( int type )
     case GRID_LAUNCH_SCENE:{ return EventGridLaunchScene::prettyName; }
     
     case METRONOME_ACTIVE:{ return EventMetronomeActive::prettyName; }
-    
+ 
+ 	case MOVE_GRID_FRAME_UP:{ return EventMoveGridFrameUp::prettyName; }
+ 	case MOVE_GRID_FRAME_DOWN:{ return EventMoveGridFrameDown::prettyName; }
+ 	/*
+ 	case MOVE_GRID_FRAME_LEFT: { return EventMoveGridFrameLeft::prettyName; }
+	case MOVE_GRID_FRAME_RIGHT: { return EventMoveGridFrameRight::prettyName; }
+	*/
     default: return 0;
   }
 }

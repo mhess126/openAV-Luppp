@@ -53,7 +53,7 @@ class LupppGUI : public Controller
     void recordArm(int t, bool b);
     void launchScene( int scene );
     void setSceneState(int track, int clip, GridLogic::State s);
-    
+    void moveGridFrame(int xOffset, int yOffset);
 };
 
 #endif // LUPPP_CONTROLLER_GUI_H

@@ -135,3 +135,11 @@ void LupppGUI::progress(int t, int s, float f)
   EventLooperProgress e( t, f );
   writeToGuiRingbuffer( &e );
 }
+
+void LupppGUI::moveGridFrame(int xOffset, int yOffset)
+{
+  LUPPP_NOTE("Writing to RB %i %i", xOffset, yOffset);
+  EventMoveGridFrameDown e( xOffset, yOffset );
+  writeToGuiRingbuffer( &e );
+}
+

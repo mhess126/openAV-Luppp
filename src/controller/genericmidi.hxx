@@ -95,7 +95,7 @@ class GenericMIDI : public Controller, public MidiIO
     std::string name;
     std::string author;
     std::string email;
-    
+
     /// contains midi binding instances
     std::vector<Binding*> midiToAction;
     std::vector<Binding*> actionToMidi;

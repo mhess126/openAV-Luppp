@@ -586,3 +586,4 @@ int Jack::static_timebase(jack_transport_state_t state,
 {
   return static_cast<Jack*>(instance)->timebase(state,nframes, pos, newPos );
 }
+

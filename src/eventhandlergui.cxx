@@ -103,14 +103,26 @@ void handleGuiEvents()
             jack_ringbuffer_read( rbToGui, (char*)&ev, sizeof(EventMasterVol) );
             gui->getMasterTrack()->getVolume()->fader( ev.vol );
           } break; }
-        
-        
         case Event::METRONOME_ACTIVE: {
           if ( availableRead >= sizeof(EventMetronomeActive) ) {
             EventMetronomeActive ev(false);
             jack_ringbuffer_read( rbToGui, (char*)&ev, sizeof(EventMetronomeActive) );
             gui->getMasterTrack()->metronomeEnable(ev.active);
           } break; }
+        case Event::MOVE_GRID_FRAME_UP: {
+        	LUPPP_NOTE("Event: MOVE_GRID_FRAME_UP");
+        	if (availableRead >= sizeof(EventMoveGridFrameUp)) {
+        		EventMoveGridFrameUp ev;
+                jack_ringbuffer_read( rbToGui, (char*)&ev, sizeof(EventMoveGridFrameUp) );
+                gui->moveGridFrame(0, -1);
+        } break; }
+        case Event::MOVE_GRID_FRAME_DOWN: {
+        		LUPPP_NOTE("Event: MOVE_GRID_FRAME_DOWN");
+				if (availableRead >= sizeof(EventMoveGridFrameDown)) {
+					EventMoveGridFrameDown ev;
+					jack_ringbuffer_read( rbToGui, (char*)&ev, sizeof(EventMoveGridFrameDown) );
+					gui->moveGridFrame(0, 1);
+        } break; }
         case Event::LOOPER_STATE: {
           if ( availableRead >= sizeof(EventLooperState) ) {
             EventLooperState ev;
@@ -373,8 +385,20 @@ void handleGuiEvents()
             // clean up ports etc, all from the GUI thread as appropriate
             delete c;
           } break; }
-        
-        
+        case Event::CONTROLLER_CONNECTED: {
+        		LUPPP_NOTE("Controller Connected Event");
+                  if ( availableRead >= sizeof(EventControllerConnected) ) {
+                    EventControllerConnected ev;
+                    jack_ringbuffer_read( rbToGui, (char*)&ev, sizeof(EventControllerConnected) );
+                    Controller* c = (Controller*)ev.controller;
+                    LUPPP_NOTE("Showing Clip Frame");
+                    gui->ctrlClipFrame->color(FL_CYAN);
+                    gui->setGridFrameWidth(c->gridWidth);
+                    gui->setGridFrameHeight(c->gridHeight);
+                    gui->setCtrlFrameSize();
+                    gui->ctrlClipFrame->show();
+                    gui->ctrlClipFrame->redraw();
+                  } break; }
         
         default:
           {

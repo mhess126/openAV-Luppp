@@ -143,7 +143,6 @@ void GridLogic::pressed( int track, int scene )
     return;
   }
   
-  
   // get the clip, do the "press" action based on current state.
   LooperClip* lc  = jack->getLooper( track )->getClip( scene );
   TrackOutput* to = jack->getTrackOutput( track );
@@ -304,3 +303,46 @@ void GridLogic::beat()
   
 }
 
+
+void GridLogic::moveGridFrameUp() {
+		LUPPP_NOTE("Writing to GUI RB");
+	  EventMoveGridFrameUp e;
+	  writeToGuiRingbuffer( &e );
+}
+void GridLogic::moveGridFrameDown() {
+	LUPPP_NOTE("Writing to GUI RB");
+	  EventMoveGridFrameDown e;
+	  writeToGuiRingbuffer( &e );
+}
+void GridLogic::updateControllerGrid()
+{
+  for(unsigned int t = 0; t < NTRACKS; t++ )
+  {
+    for(int s = 0 + sceneOffset; s < NSCENES; s++ )
+    {
+      LooperClip* lc = jack->getLooper( t )->getClip( s );
+      if ( s == scene )
+      {
+        lc->queuePlay();
+        jack->getControllerUpdater()->setSceneState( t, s, lc->getState() );
+      }
+      else
+      {
+        if ( lc->playing() )
+        {
+          lc->queueStop();
+          jack->getControllerUpdater()->setSceneState( t, s, lc->getState() );
+        }
+        else if ( lc->somethingQueued() )
+        {
+          lc->neutralize();
+          jack->getControllerUpdater()->setSceneState( t, s, lc->getState() );
+        }
+      }
+    }
+  }
+
+  sceneLaunch = scene;
+
+  jack->getControllerUpdater()->launchScene( scene );
+}

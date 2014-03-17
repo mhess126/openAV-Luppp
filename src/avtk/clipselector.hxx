@@ -93,7 +93,7 @@ class ClipSelector : public Fl_Button
     
     void setID( int id );
     
-    /** converts the Looper::State into the UI represnted ClipSelector state.
+    /** converts the Looper::State into the UI represented ClipSelector state.
      * It puts some of the data into clips[], and stores unique state into the class.
     **/
     void setState( int clipNum, GridLogic::State s );

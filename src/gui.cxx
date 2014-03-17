@@ -19,7 +19,6 @@
 #include "gui.hxx"
 #include "avtk/avtk_image.h"
 #include "avtk/avtk_button.h"
-
 #include <sstream>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -49,13 +48,18 @@ extern Jack* jack;
 #include "../planning/luppp.c"
 #include "../planning/bg.c"
 
+#define GTRACK_WIDTH 110
+#define GTRACK_HEIGHT 600
+
+#define MIDI_LED_ARRAY_WIDTH 8
+#define MIDI_LED_ARRAY_HEIGHT 5
+
 // Hack, move to gtrack.cpp
 int GTrack::privateID = 0;
 int GMasterTrack::privateID = 0;
 //int AudioBuffer::privateID = 0;
 
 using namespace std;
-
 
 extern Gui* gui;
 extern int signalHanlderInt;
@@ -219,6 +223,14 @@ OptionsWindow* Gui::getOptionsWindow()
   return optionWindow;
 }
 
+/*
+void Gui::setMidiControllerLayoutValues(Controller *c)
+{
+	gridFrameWidth = c->gridWidth;
+	gridFrameHeight = c->gridHeight;
+}
+*/
+#if 0
 void Gui::selectLoadController(Fl_Widget* w, void*)
 {
   // FIXME: refactor
@@ -245,6 +257,13 @@ void Gui::selectLoadController(Fl_Widget* w, void*)
   
   if ( c->status() == Controller::CONTROLLER_OK )
   {
+	LUPPP_NOTE("Controller Loaded: GridWidth: %i, GridHeight: %i", c->gridWidth, c->gridHeight);
+	if (c->gridWidth > 0 && c->gridHeight > 0) {
+		LUPPP_NOTE("Controller has Grid, Show Frame");
+        LUPPP_NOTE("Pushing Controller Instance to GUI RB");
+        EventControllerConnected tmp(c);
+		writeToGuiRingbuffer( &tmp );
+	}
     EventControllerInstance e(c);
     writeToDspRingbuffer( &e );
   }
@@ -254,6 +273,7 @@ void Gui::selectLoadController(Fl_Widget* w, void*)
   }
   
 }
+#endif
 
 void Gui::selectLoadSample( int track, int scene )
 {
@@ -287,6 +307,22 @@ void Gui::selectLoadSample( int track, int scene )
 AudioEditor* Gui::getAudioEditor()
 {
   return audioEditor;
+}
+bool Gui::moveGridFrame(int xOffset, int yOffset)
+{
+	gridFrameTrackOffset += xOffset;
+	int numClips = tracks.at(0)->getClipSelector()->numClips;
+
+	LUPPP_NOTE("gridFrameClipOffset: %i, yOffset: %i, numTracks: %i", gridFrameClipOffset, yOffset, int(tracks.size()));
+	if ((gridFrameClipOffset + yOffset >= 0) && ((gridFrameClipOffset + gridFrameHeight + yOffset) <= numClips)) {
+    	gridFrameClipOffset += yOffset;
+
+		ctrlClipFrame->hide();
+		setCtrlFrameSize();
+		ctrlClipFrame->show();
+		ctrlClipFrame->redraw();
+	}
+    return true;
 }
 
 
@@ -326,13 +362,25 @@ static int cb_nsm_save ( char **out_msg, void *userdata )
   
   return 0;
 }
+void Gui::setCtrlFrameSize() {
+
+	/* Added Frame to show active clips displayed on hardware control */
+	int clipHeight = gui->getTrack( 0 )->clipSel.h / gui->getTrack(0)->clipSel.numClips;
+	int frameAnchorX = gui->getTrack( 0 )->x();
+	int frameAnchorY = gui->getTrack( 0 )->clipSel.y -1 + (clipHeight * gridFrameClipOffset);
+	int frameWidth = ((GTRACK_WIDTH+8) * gridFrameWidth) - 8;
+	int frameHeight = ((clipHeight) * gridFrameHeight) + 1;
+	LUPPP_NOTE("faX: %i, faY: %i, fW: %i, fH: %i, cO: %i", frameAnchorX, frameAnchorY, frameWidth, frameHeight, gridFrameClipOffset);
+
+	ctrlClipFrame->resize(frameAnchorX, frameAnchorY, frameWidth, frameHeight);
+
+}
 
 
 
 Gui::Gui(const char* argZero) :
     samplerate( 0 ),
     window(1110,650),
-    
     diskReader( new DiskReader() ),
     diskWriter( new DiskWriter() )
 {
@@ -354,6 +402,10 @@ Gui::Gui(const char* argZero) :
   
   window.color( fl_rgb_color (7,7,7) );
   
+  /* For Midi Controllers with Grid Pads */
+  gridFrameWidth = 0;
+  gridFrameHeight = 0;
+
   /*
   tooltipLabel = new Fl_2(130, 25, 500, 20, "");
   tooltipLabel->labelcolor( FL_LIGHT2 );
@@ -411,25 +463,39 @@ Gui::Gui(const char* argZero) :
       stringstream s;
       s << "Track " << i+1;
       //printf("track name %s\n", s.str().c_str() );
-      tracks.push_back( new GTrack(8 + i * 118, 40, 110, 600, s.str().c_str() ) );
+      tracks.push_back( new GTrack(8 + i * 118, 40, GTRACK_WIDTH, GTRACK_HEIGHT, s.str().c_str() ) );
     }
     
     master = new GMasterTrack(8 + i * 118, 40, 150, 600, "Master");
-  }
+
+		ctrlClipFrame = new Fl_Box(
+				FL_BORDER_FRAME,
+				0,
+				0,
+				0,
+				0,
+				NULL
+			);
+
+		  ctrlClipFrame->color(FL_GREEN);
+    }
+
+  /* ctrlClipFrame->hide(); */
+
   lupppGroup->end();
   
   window.resizable( lupppGroup );
   
   window.end();
   
-  tracks.at(0)->getClipSelector()->setSpecial( 0 );
-  
-  
+
+  /* tracks.at(0)->getClipSelector()->setSpecial( 0 ); */
+
   optionWindow = new OptionsWindow();
-  
+
   // Create AudioEditor after window.end() has been called
   audioEditor = new AudioEditor();
-  
+
   // read settings file using diskreader, and setup controllers etc
   int prefs = diskReader->loadPreferences();
   if ( prefs != LUPPP_RETURN_OK )
@@ -573,5 +639,6 @@ Gui::~Gui()
     delete tracks.at(i);
   }
   
+  delete ctrlClipFrame;
   
 }

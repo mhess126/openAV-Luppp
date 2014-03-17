@@ -501,6 +501,19 @@ void GenericMIDI::midi(unsigned char* midi)
             break;
         
         case Event::MASTER_VOL:   jack->getLogic()->trackVolume( -1     , value ); break;
+        case Event::MOVE_GRID_FRAME_UP:
+        	LUPPP_NOTE("Midi Event: MOVE_GRID_FRAME_UP %d", value);
+        	if (value > 0) {
+        		jack->getGridLogic()->moveGridFrameUp();
+        	}
+        	break;
+
+        case Event::MOVE_GRID_FRAME_DOWN:
+        	LUPPP_NOTE("Midi Event: MOVE_GRID_FRAME_DOWN %d", value);
+        	if (value > 0) {
+        		jack->getGridLogic()->moveGridFrameDown();
+        	}
+        	break;
       }
     }
     
@@ -639,7 +652,19 @@ int GenericMIDI::loadController( std::string file )
     {
         LUPPP_NOTE("Has no author field");
     }
-    
+    cJSON* layoutJson = cJSON_GetObjectItem( controllerJson, "layout");
+    if (layoutJson)
+    {
+    	LUPPP_NOTE("Parsing Layout");
+    	gridWidth = cJSON_GetObjectItem( layoutJson, "gridWidth")->valueint;
+    	LUPPP_NOTE("GridWidth: %i", gridWidth);
+    	gridHeight = cJSON_GetObjectItem( layoutJson, "gridHeight")->valueint;
+    	LUPPP_NOTE("GridHeight: %i", gridHeight);
+    }
+    else
+    {
+    	LUPPP_NOTE("Has no Layout Values");
+    }
     cJSON* linkJson = cJSON_GetObjectItem( controllerJson, "link" );
     if ( linkJson )
     {
